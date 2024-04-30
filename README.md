@@ -18,5 +18,6 @@ main: Entry point to inititate server
 -Run server in one terminal/first machine
 -Run client, follow prompts to specify IP address and port number to connect to a peer
 
+![image](https://github.com/JAZMYNW/Peer-to-Peer-Messaging/assets/95877548/953fba3a-a7e3-425f-a12d-5a883c0551e0)
 
-*implementation based on the tutorial provided in class
+*implementation based on the tutorial provided in class*
