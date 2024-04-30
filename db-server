@@ -1,0 +1,50 @@
+import socket
+import sqlite3
+
+def cc_database(): #create or connect
+    conn = sqlite3.connect('server_database.db')  # Creates or opens a database file
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS clients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            address TEXT UNIQUE,
+            port INTEGER
+        )
+    ''')
+    conn.commit()
+    return conn
+
+def regclient(db_conn, client_address):
+    cursor = db_conn.cursor()
+    try:
+        cursor.execute('INSERT INTO clients (address, port) VALUES (?, ?)', (client_address[0], client_address[1]))
+        db_conn.commit()
+    except sqlite3.IntegrityError:
+        print("Client already registered")
+
+def get_regclients(db_conn, current_address):
+    cursor = db_conn.cursor()
+    cursor.execute('SELECT address, port FROM clients WHERE address != ?', (current_address[0],))
+    return cursor.fetchall()
+
+def main():
+    host = "127.0.0.1"
+    port = 65432
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen()
+    print('Server is running and listening at', server_socket.getsockname())
+
+    db_conn = cc_database()  
+
+    while True:
+        client_socket, client_address = server_socket.accept()
+        print(f'Accepted a connection from {client_address}')
+
+        regclient(db_conn, client_address)  
+        other_clients = get_regclients(db_conn, client_address) 
+
+        client_socket.sendall(str(other_clients).encode('ascii'))  
+
+if __name__ == '__main__':
+    main()
